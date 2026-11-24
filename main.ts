@@ -36,12 +36,17 @@ const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 // rejected entry: UTF-8 text, 1–200 characters, not whitespace-only,
 // exactly one line (no newline at all), no leading/trailing whitespace
 // that would pad the judged text. The line is 115 characters.
+// Also require ASCII-only: with ASCII, byte length equals character
+// length, so the leaderboard's Size column (bytes) stays 115 too —
+// the size tie-break rewards the smaller text, and an accidental
+// non-ASCII character would silently inflate it.
 if (
   LINE.length < 1 ||
   LINE.length > 200 ||
   LINE.trim() === '' ||
   LINE !== LINE.trim() ||
-  /[\r\n]/.test(LINE)
+  /[\r\n]/.test(LINE) ||
+  Buffer.byteLength(LINE, 'utf8') !== LINE.length
 ) {
   throw new Error(`entry violates the gate: ${LINE.length} chars`);
 }
